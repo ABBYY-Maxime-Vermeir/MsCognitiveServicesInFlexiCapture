@@ -4,4 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ControllerInterop">
+      <HintPath>..\..\..\..\..\Program Files\ABBYY FlexiCapture 12 Developer's Package\ControllerInterop.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
