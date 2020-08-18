@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
-using System.Drawing.Image;
 
 namespace MsCognitiveServicesInFlexiCapture
 {
@@ -33,7 +32,7 @@ namespace MsCognitiveServicesInFlexiCapture
         }
 
 
-        public void ReadHandPrint(byte[] image)
+        public void ReadHandPrintFromBinary(byte[] image)
         {
 
             // Call the REST API method.
@@ -44,7 +43,7 @@ namespace MsCognitiveServicesInFlexiCapture
             Console.ReadLine();
         }
 
-        public async void ReadHandPrint(IDocument doc, IProcessingCallback callback)
+        public async void ReadDocument(IDocument doc, IProcessingCallback callback)
         {
 
             // Call the REST API method.
@@ -59,19 +58,63 @@ namespace MsCognitiveServicesInFlexiCapture
 
         }
 
-
-        public void ReadHandPrint(IFieldRegion field, IValue value)
+        public async void ReadHandPrint(IField field)
         {
 
             // Call the REST API method.
             Console.WriteLine("\nExtracting text...\n");
 
-            Image image = 
+            string filepath = @"C:\temp\" + Guid.NewGuid().ToString("N");
+            field.Regions[0].Picture.SaveAs(filepath);
 
-            ReadText(SubscriptionKey, Endpoint, field.Picture.).Wait();
+            byte[] image = this.GetImageAsByteArray(filepath);
 
-            Console.WriteLine("\nPress Enter to exit...");
-            Console.ReadLine();
+            string contentstring = await ReadText(SubscriptionKey, Endpoint, image);
+
+            string finalValue = "";
+            JToken jsondata = JToken.Parse(contentstring);
+
+            //string OneCharacter = (string)theData.SelectToken("analyzeResult.readResults[0].lines[0].text");
+
+            foreach (JToken character in jsondata.SelectToken("analyzeResult.readResults[0].lines"))
+            {
+
+                finalValue += (string)character.SelectToken("text");
+                Console.Write((string)character.SelectToken("text"));
+
+            }
+
+            field.Text = finalValue;
+        }
+
+
+        public async void ReadHandPrint(IFieldRegion field, IValue value)
+        {
+
+            // Call the REST API method.
+            Console.WriteLine("\nExtracting text...\n");
+
+            string filepath = @"C:\temp\" + Guid.NewGuid().ToString("N");
+            field.Picture.SaveAs(filepath);
+
+            byte[] image = this.GetImageAsByteArray(filepath);
+
+            string contentstring = await ReadText(SubscriptionKey, Endpoint, image);
+
+            string finalValue = "";
+            JToken jsondata = JToken.Parse(contentstring);
+
+            //string OneCharacter = (string)theData.SelectToken("analyzeResult.readResults[0].lines[0].text");
+            
+            foreach (JToken character in jsondata.SelectToken("analyzeResult.readResults[0].lines"))
+            {
+
+                finalValue += (string)character.SelectToken("text");
+                Console.Write((string)character.SelectToken("text"));
+
+            }
+
+            value.Text = finalValue;
         }
 
         static async Task<string> ReadText(string key, string ep, byte[] image)
@@ -154,6 +197,7 @@ namespace MsCognitiveServicesInFlexiCapture
                 // Display the JSON response.
                 Console.WriteLine("\nResponse:\n\n{0}\n",
                     JToken.Parse(contentString).ToString());
+                
             }
             catch (Exception e)
             {
@@ -184,5 +228,6 @@ namespace MsCognitiveServicesInFlexiCapture
 
         //TODO
         //https://devblogs.microsoft.com/cse/2018/05/07/handwriting-detection-and-recognition-in-scanned-documents-using-azure-ml-package-computer-vision-azure-cognitive-services-ocr/
+        //Replaced by MS Cognitive services prediction API
     }
 }
