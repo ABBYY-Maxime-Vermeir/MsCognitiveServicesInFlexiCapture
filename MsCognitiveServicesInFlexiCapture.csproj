@@ -10,7 +10,8 @@
 
   <ItemGroup>
     <Reference Include="ControllerInterop">
-      <HintPath>..\..\..\..\..\Program Files\ABBYY FlexiCapture 12 Developer's Package\ControllerInterop.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\ControllerInterop.dll</HintPath>
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
 
